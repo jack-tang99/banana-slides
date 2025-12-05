@@ -147,11 +147,18 @@ def generate_material_image(project_id):
     - prompt: Text-to-image prompt (passed directly to the model without modification)
     - ref_image: Main reference image (optional)
     - extra_images: Additional reference images (multiple files, optional)
+    
+    Note: project_id can be 'none' to generate global materials (not associated with any project)
     """
     try:
-        project = Project.query.get(project_id)
-        if not project:
-            return not_found('Project')
+        # 支持 'none' 作为特殊值，表示生成全局素材
+        if project_id != 'none':
+            project = Project.query.get(project_id)
+            if not project:
+                return not_found('Project')
+        else:
+            project = None
+            project_id = None  # 设置为None表示全局素材
 
         # Parse request data (prioritize multipart for file uploads)
         if request.is_json:

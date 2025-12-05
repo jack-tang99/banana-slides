@@ -42,12 +42,7 @@ export const Home: React.FC = () => {
   }, []);
 
   const handleOpenMaterialModal = () => {
-    const projectId = localStorage.getItem('currentProjectId');
-    if (!projectId) {
-      show({ message: '请先创建一个项目', type: 'info' });
-      return;
-    }
-    setCurrentProjectId(projectId);
+    // 在主页始终生成全局素材，不关联任何项目
     setIsMaterialModalOpen(true);
   };
 
@@ -244,14 +239,12 @@ export const Home: React.FC = () => {
         </Card>
       </main>
       <ToastContainer />
-      {/* 素材生成模态 */}
-      {currentProjectId && (
-        <MaterialGeneratorModal
-          projectId={currentProjectId}
-          isOpen={isMaterialModalOpen}
-          onClose={() => setIsMaterialModalOpen(false)}
-        />
-      )}
+      {/* 素材生成模态 - 在主页始终生成全局素材 */}
+      <MaterialGeneratorModal
+        projectId={null}
+        isOpen={isMaterialModalOpen}
+        onClose={() => setIsMaterialModalOpen(false)}
+      />
     </div>
   );
 };

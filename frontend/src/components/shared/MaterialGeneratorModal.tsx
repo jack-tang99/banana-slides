@@ -7,7 +7,7 @@ import { materialUrlToFile } from './MaterialSelector';
 import type { Material } from '@/api/endpoints';
 
 interface MaterialGeneratorModalProps {
-  projectId: string;
+  projectId?: string | null; // 可选，如果不提供则生成全局素材
   isOpen: boolean;
   onClose: () => void;
 }
@@ -97,12 +97,17 @@ export const MaterialGeneratorModal: React.FC<MaterialGeneratorModalProps> = ({
 
     setIsGenerating(true);
     try {
-      const resp = await generateMaterialImage(projectId, prompt.trim(), refImage as File, extraImages);
+      // 如果没有projectId，使用'none'表示生成全局素材
+      const targetProjectId = projectId || 'none';
+      const resp = await generateMaterialImage(targetProjectId, prompt.trim(), refImage as File, extraImages);
       const url = resp.data?.image_url;
       if (url) {
         // 最新结果展示在顶部
         setPreviewUrl(getImageUrl(url));
-        show({ message: '素材生成成功，已保存到历史素材库', type: 'success' });
+        const message = projectId 
+          ? '素材生成成功，已保存到历史素材库' 
+          : '素材生成成功，已保存到全局素材库';
+        show({ message, type: 'success' });
       } else {
         show({ message: '素材生成失败：未返回图片地址', type: 'error' });
       }

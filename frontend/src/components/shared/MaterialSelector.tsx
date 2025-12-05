@@ -40,20 +40,14 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [filterProjectId, setFilterProjectId] = useState<string>(projectId || 'all');
+  const [filterProjectId, setFilterProjectId] = useState<string>('all'); // 始终默认显示所有素材
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectsLoaded, setProjectsLoaded] = useState(false);
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [saveAsTemplate, setSaveAsTemplate] = useState(true); // 默认勾选：保存为模板
+  const [showAllProjects, setShowAllProjects] = useState(false); // 控制是否显示所有项目
 
-  // 当 projectId 变化时，更新 filterProjectId
-  useEffect(() => {
-    if (projectId) {
-      setFilterProjectId(projectId);
-    } else {
-      setFilterProjectId('all');
-    }
-  }, [projectId]);
+  // 不再根据 projectId 自动改变筛选，用户可以自己选择
 
   useEffect(() => {
     if (isOpen) {
@@ -61,6 +55,8 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
         loadProjects();
       }
       loadMaterials();
+      // 每次打开时重置展开状态
+      setShowAllProjects(false);
     }
   }, [isOpen, filterProjectId, projectsLoaded]);
 
@@ -256,16 +252,42 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
               {/* 项目筛选下拉菜单 */}
               <select
                 value={filterProjectId}
-                onChange={(e) => setFilterProjectId(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === 'show_more') {
+                    // 点击"查看更多项目"时展开列表
+                    setShowAllProjects(true);
+                    return;
+                  }
+                  setFilterProjectId(value);
+                }}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-banana-500 w-40 sm:w-48 max-w-[200px] truncate"
               >
+                {/* 固定显示的前三个选项 */}
                 <option value="all">所有素材</option>
                 <option value="none">未关联项目</option>
-                {projects.map((p) => (
-                  <option key={p.project_id} value={p.project_id} title={p.idea_prompt || p.outline_text}>
-                    {renderProjectLabel(p)}
+                {projectId && (
+                  <option value={projectId}>
+                    当前项目{projects.find(p => p.project_id === projectId) ? `: ${renderProjectLabel(projects.find(p => p.project_id === projectId)!)}` : ''}
                   </option>
-                ))}
+                )}
+                
+                {/* 展开后显示所有项目 */}
+                {showAllProjects ? (
+                  <>
+                    <option disabled>───────────</option>
+                    {projects.filter(p => p.project_id !== projectId).map((p) => (
+                      <option key={p.project_id} value={p.project_id} title={p.idea_prompt || p.outline_text}>
+                        {renderProjectLabel(p)}
+                      </option>
+                    ))}
+                  </>
+                ) : (
+                  // 未展开时显示"查看更多项目"选项
+                  projects.length > (projectId ? 1 : 0) && (
+                    <option value="show_more">+ 查看更多项目...</option>
+                  )
+                )}
               </select>
               
               <Button
