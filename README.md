@@ -99,13 +99,22 @@
 
 - 🚀 **一句话生成 PPT**：从一个简单的想法快速得到大纲、页面描述和最终的 PPT 文稿
 - 🔄 **三种生成路径**：支持从「想法 / 大纲 / 页面描述」三种方式起步，适配不同创作习惯
+- 🧙‍♀️ **AI 辅助编排**：由 LLM 生成结构清晰的大纲和逐页内容描述
+<img width="1380" height="684" alt="image" src="https://github.com/user-attachments/assets/a76cbc57-b688-42e4-bc3a-a75ad3c505f4" />
+
 - 🔍 **文本与链接自动提取**：支持从一段文本中自动抽取要点、图片链接等信息
 - 🔗 **文件上传自动解析**: 支持导入docx/pdf/md/txt等格式的文件，后台自动解析，为图片内容生成描述，为后续生成提供素材。
-- 🧾 **上传任意素材**：可上传参考图片、示例 PPT图（后续支持ppt文件） 等作为风格和内容参考
-- 🧙‍♀️ **AI 辅助编排**：由 LLM 生成结构清晰的大纲和逐页内容描述
+- 🧾 **上传任意素材**：可上传参考风格图片、示例 PPT模板图片 等作为风格和内容参考
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8cda1fd2-2369-4028-b310-ea6604183936" />
+
+
 - 🖼️ **高质量页面生成**：基于 nano banana pro🍌 生成高清、风格统一的页面设计
 - 🗣️ **自然语言修改**：支持对单页、单页局部（已支持）或整套（未来支持）PPT 进行「口头」式自然语言修改与重生成
+<img width="1920" height="1141" alt="image" src="https://github.com/user-attachments/assets/0639038a-a06f-445f-8883-896e882f60e9" />
+
+  
 - 📊 **一键导出**：自动组合为 PPTX / PDF，16:9 比例，开箱即用
+<img width="1748" height="538" alt="image" src="https://github.com/user-attachments/assets/647eb9b1-d0b6-42cb-a898-378ebe06c984" />
 
 ### 1. 多种创建方式
 - **从构想生成**：输入一句话 / 一段想法，自动生成完整大纲和页面内容
