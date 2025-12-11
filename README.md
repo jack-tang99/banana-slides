@@ -34,10 +34,10 @@
 
 </div>
 
-🚀 致谢
+
 ---
 <div align="center">
-<br>
+<h3>🚀 致谢</h3>
 <a href="https://aihubmix.com/?aff=17EC">
   <img src="./assets/logo_aihubmix.png" alt="AIHubMix" style="height:48px;">
 </a>
