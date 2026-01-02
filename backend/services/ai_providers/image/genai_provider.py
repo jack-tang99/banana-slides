@@ -74,7 +74,8 @@ class GenAIImageProvider(ImageProvider):
         prompt: str,
         ref_images: Optional[List[Image.Image]] = None,
         aspect_ratio: str = "16:9",
-        resolution: str = "2K"
+        resolution: str = "2K",
+        enable_thinking: bool = False
     ) -> Optional[Image.Image]:
         """
         Generate image using Google GenAI SDK
@@ -84,6 +85,7 @@ class GenAIImageProvider(ImageProvider):
             ref_images: Optional list of reference images
             aspect_ratio: Image aspect ratio
             resolution: Image resolution (supports "1K", "2K", "4K")
+            enable_thinking: If True, enable thinking chain mode (may generate multiple images)
             
         Returns:
             Generated PIL Image object, or None if failed
@@ -101,18 +103,27 @@ class GenAIImageProvider(ImageProvider):
             contents.append(prompt)
             
             logger.debug(f"Calling GenAI API for image generation with {len(ref_images) if ref_images else 0} reference images...")
-            logger.debug(f"Config - aspect_ratio: {aspect_ratio}, resolution: {resolution}")
+            logger.debug(f"Config - aspect_ratio: {aspect_ratio}, resolution: {resolution}, enable_thinking: {enable_thinking}")
+            
+            # Build config
+            config_params = {
+                'response_modalities': ['TEXT', 'IMAGE'],
+                'image_config': types.ImageConfig(
+                    aspect_ratio=aspect_ratio,
+                    image_size=resolution
+                )
+            }
+            
+            # Add thinking config if enabled
+            if enable_thinking:
+                config_params['thinking_config'] = types.ThinkingConfig(
+                    include_thoughts=True
+                )
             
             response = self.client.models.generate_content(
                 model=self.model,
                 contents=contents,
-                config=types.GenerateContentConfig(
-                    response_modalities=['TEXT', 'IMAGE'],
-                    image_config=types.ImageConfig(
-                        aspect_ratio=aspect_ratio,
-                        image_size=resolution
-                    ),
-                )
+                config=types.GenerateContentConfig(**config_params)
             )
             
             logger.debug("GenAI API call completed")
