@@ -112,7 +112,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
     <div className="space-y-6">
       {/* 欢迎标题 */}
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center justify-center">
+        <div className="inline-flex items-center justify-center mr-4">
           <img
             src="/logo.png"
             alt="蕉幻 Logo"
@@ -133,12 +133,14 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
           <div className="flex-1 space-y-2">
             <h4 className="font-semibold text-gray-800">配置 API Key</h4>
             <p className="text-sm text-gray-600">
-              前往设置页面，配置您的 AI 服务提供商的 API Key，包括：
+              前往设置页面，配置项目需要使用的API服务，包括：
             </p>
             <ul className="text-sm text-gray-600 space-y-1 pl-4">
-              <li>• 文本生成模型（如 OpenAI、Anthropic、Google 等）</li>
-              <li>• 图像生成模型（如 OpenAI DALL-E 等）</li>
-              <li>• 图像描述模型（可选，用于图片内容识别）</li>
+              <li>• 您的 AI 服务提供商的 API Base 和 API Key</li>
+              <li>• 配置文本、图像生成模型(banana pro)和图像描述模型</li>
+              <li>• 若需要文件解析功能，请配置 MinerU Token</li>
+              <li>• 若需要可编辑导出功能，请配置MinerU TOKEN 和 Baidu API KEY</li>
+
             </ul>
           </div>
         </div>
@@ -168,6 +170,26 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* 步骤 4 遇到问题可到github issue提出 */}
+      <div className="flex gap-4 p-4 bg-white rounded-xl border border-gray-200">
+        <div className="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold">
+          4
+        </div>
+        <div className="flex-1 space-y-2">
+        <h4 className="font-semibold text-gray-800">*问题反馈</h4>
+          <p className="text-sm text-gray-600">若使用过程中遇到问题，可在github issue提出</p>
+        </div>
+        <a
+          href="https://github.com/Anionex/banana-slides/issues"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-sm text-banana-600 hover:text-banana-700 font-medium"
+        >
+          <ExternalLink size={14} />
+          前往Github issue
+        </a>
       </div>
 
       {/* 前往设置按钮 */}
