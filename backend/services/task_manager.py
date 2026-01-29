@@ -871,6 +871,10 @@ def export_editable_pptx_with_recursive_analysis_task(
             fail_fast = not export_allow_partial
             logger.info(f"导出设置: export_allow_partial={export_allow_partial}, fail_fast={fail_fast}")
 
+            # IMPORTANT: Expire cached objects to ensure fresh data from database
+            # This prevents reading stale generated_image_path after page regeneration
+            db.session.expire_all()
+
             # Get pages (filtered by page_ids if provided)
             pages = get_filtered_pages(project_id, page_ids)
             if not pages:
