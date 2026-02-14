@@ -269,12 +269,26 @@ def _load_settings_to_config(app):
 app = create_app()
 
 
+def _compute_worktree_port(base_port: int) -> int:
+    """Compute a deterministic port from the worktree directory name.
+
+    Uses MD5 of the project root basename so each worktree gets a unique,
+    stable port pair (backend 5xxx, frontend 3xxx) without manual config.
+    """
+    import hashlib
+    basename = _project_root.name
+    offset = int(hashlib.md5(basename.encode()).hexdigest()[:8], 16) % 500
+    return base_port + offset
+
+
 if __name__ == '__main__':
     # Run development server
     if os.getenv("IN_DOCKER", "0") == "1":
         port = 5000  # Docker 容器内部固定使用 5000 端口
+    elif os.getenv('BACKEND_PORT'):
+        port = int(os.getenv('BACKEND_PORT'))
     else:
-        port = int(os.getenv('BACKEND_PORT', 5000))
+        port = _compute_worktree_port(5000)
     debug = os.getenv('FLASK_ENV', 'development') == 'development'
     
     logging.info(
