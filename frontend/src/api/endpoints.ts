@@ -166,6 +166,23 @@ export const generatePageDescription = async (
 };
 
 /**
+ * 重新生成 PPT 翻新项目的单页（重新解析原 PDF 并提取内容）
+ */
+export const regenerateRenovationPage = async (
+  projectId: string,
+  pageId: string,
+  keepLayout: boolean = false,
+  language?: OutputLanguage
+): Promise<ApiResponse> => {
+  const lang = language || await getStoredOutputLanguage();
+  const response = await apiClient.post<ApiResponse>(
+    `/api/projects/${projectId}/pages/${pageId}/regenerate-renovation`,
+    { keep_layout: keepLayout, language: lang }
+  );
+  return response.data;
+};
+
+/**
  * 根据用户要求修改大纲
  * @param projectId 项目ID
  * @param userRequirement 用户要求

@@ -37,12 +37,13 @@ interface ProjectState {
   startAsyncTask: (apiCall: () => Promise<any>) => Promise<void>;
   pollTask: (taskId: string) => Promise<void>;
   pollImageTask: (taskId: string, pageIds: string[]) => void;
-  
+
   // 生成操作
   generateOutline: () => Promise<void>;
   generateFromDescription: () => Promise<void>;
   generateDescriptions: () => Promise<void>;
   generatePageDescription: (pageId: string) => Promise<void>;
+  regenerateRenovationPage: (pageId: string, keepLayout?: boolean) => Promise<void>;
   generateImages: (pageIds?: string[]) => Promise<void>;
   editPageImage: (
     pageId: string,
@@ -704,6 +705,59 @@ const debouncedUpdatePage = debounce(
       }
     } catch (error: any) {
       set({ error: normalizeErrorMessage(error.message || '生成描述失败') });
+      throw error;
+    } finally {
+      // 清除生成状态
+      const { pageDescriptionGeneratingTasks: currentTasks } = get();
+      const newTasks = { ...currentTasks };
+      delete newTasks[pageId];
+      set({ pageDescriptionGeneratingTasks: newTasks });
+    }
+  },
+
+  // 重新生成 PPT 翻新项目的单页（重新解析原 PDF 并提取内容）
+  regenerateRenovationPage: async (pageId: string, keepLayout: boolean = false) => {
+    const { currentProject, pageDescriptionGeneratingTasks } = get();
+    if (!currentProject) return;
+
+    // 如果该页面正在生成，不重复提交
+    if (pageDescriptionGeneratingTasks[pageId]) {
+      console.log(`[PPT翻新] 页面 ${pageId} 正在生成中，跳过重复请求`);
+      return;
+    }
+
+    set({ error: null });
+
+    // 标记为生成中
+    set({
+      pageDescriptionGeneratingTasks: {
+        ...pageDescriptionGeneratingTasks,
+        [pageId]: true,
+      },
+    });
+
+    try {
+      const response = await api.regenerateRenovationPage(currentProject.id, pageId, keepLayout);
+
+      // 使用 API 返回的页面数据直接更新 store
+      if (response.data) {
+        const updatedPageData = response.data;
+        const { currentProject: latestProject } = get();
+        if (latestProject) {
+          const updatedPages = latestProject.pages.map((page) =>
+            page.id === pageId ? { ...page, ...updatedPageData } : page
+          );
+          set({
+            currentProject: {
+              ...latestProject,
+              pages: updatedPages,
+            },
+          });
+          console.log(`[PPT翻新] 页面 ${pageId} 大纲和描述已更新`);
+        }
+      }
+    } catch (error: any) {
+      set({ error: normalizeErrorMessage(error.message || '重新生成失败') });
       throw error;
     } finally {
       // 清除生成状态

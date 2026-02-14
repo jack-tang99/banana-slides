@@ -24,6 +24,8 @@ const detailI18n = {
         confirmRegenerate: "部分页面已有描述，重新生成将覆盖，确定继续吗？",
         confirmRegenerateTitle: "确认重新生成",
         confirmRegeneratePage: "该页面已有描述，重新生成将覆盖现有内容，确定继续吗？",
+        confirmRenovationRegenerate: "您现在是 PPT 翻新模式，重新生成会依照原 PPT 相同页码页面，重新解析并生成该页的大纲和描述，覆盖已有内容。确定要继续吗？",
+        confirmRenovationRegenerateTitle: "重新解析此页",
         refineSuccess: "页面描述修改成功", refineFailed: "修改失败，请稍后重试",
         exportSuccess: "导出成功", loadingProject: "加载项目中..."
       }
@@ -48,6 +50,8 @@ const detailI18n = {
         confirmRegenerate: "Some pages already have descriptions. Regenerating will overwrite them. Continue?",
         confirmRegenerateTitle: "Confirm Regenerate",
         confirmRegeneratePage: "This page already has a description. Regenerating will overwrite it. Continue?",
+        confirmRenovationRegenerate: "You are in PPT renovation mode. Regenerating will re-parse the original PDF page and regenerate the outline and description, overwriting existing content. Continue?",
+        confirmRenovationRegenerateTitle: "Re-parse This Page",
         refineSuccess: "Descriptions modified successfully", refineFailed: "Modification failed, please try again",
         exportSuccess: "Export successful", loadingProject: "Loading project..."
       }
@@ -72,6 +76,7 @@ export const DetailEditor: React.FC = () => {
     updatePageLocal,
     generateDescriptions,
     generatePageDescription,
+    regenerateRenovationPage,
     pageDescriptionGeneratingTasks,
   } = useProjectStore();
   const { show, ToastContainer } = useToast();
@@ -184,38 +189,44 @@ export const DetailEditor: React.FC = () => {
 
   const handleRegeneratePage = async (pageId: string) => {
     if (!currentProject) return;
-    
+
     const page = currentProject.pages.find((p) => p.id === pageId);
     if (!page) return;
-    
-    // 如果已有描述，询问是否覆盖
-    if (page.description_content) {
+
+    // 判断是否是 PPT 翻新模式
+    const isRenovation = currentProject.creation_type === 'ppt_renovation';
+
+    const executeRegenerate = async () => {
+      try {
+        if (isRenovation) {
+          await regenerateRenovationPage(pageId);
+        } else {
+          await generatePageDescription(pageId);
+        }
+        show({ message: t('detail.messages.generateSuccess'), type: 'success' });
+      } catch (error: any) {
+        show({
+          message: `${t('detail.messages.generateFailed')}: ${error.message || t('common.unknownError')}`,
+          type: 'error'
+        });
+      }
+    };
+
+    // PPT 翻新模式 或 已有描述时，需要确认
+    if (isRenovation) {
+      confirm(
+        t('detail.messages.confirmRenovationRegenerate'),
+        executeRegenerate,
+        { title: t('detail.messages.confirmRenovationRegenerateTitle'), variant: 'warning' }
+      );
+    } else if (page.description_content) {
       confirm(
         t('detail.messages.confirmRegeneratePage'),
-        async () => {
-          try {
-            await generatePageDescription(pageId);
-            show({ message: t('detail.messages.generateSuccess'), type: 'success' });
-          } catch (error: any) {
-            show({ 
-              message: `${t('detail.messages.generateFailed')}: ${error.message || t('common.unknownError')}`, 
-              type: 'error' 
-            });
-          }
-        },
+        executeRegenerate,
         { title: t('detail.messages.confirmRegenerateTitle'), variant: 'warning' }
       );
-      return;
-    }
-    
-    try {
-      await generatePageDescription(pageId);
-      show({ message: t('detail.messages.generateSuccess'), type: 'success' });
-    } catch (error: any) {
-      show({ 
-        message: `${t('detail.messages.generateFailed')}: ${error.message || t('common.unknownError')}`, 
-        type: 'error' 
-      });
+    } else {
+      await executeRegenerate();
     }
   };
 
