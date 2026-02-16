@@ -40,20 +40,16 @@ test.describe('UI-driven E2E test: From user interface to PPT export', () => {
     // Step 1: Visit homepage
     // ====================================
     console.log('📱 Step 1: Opening homepage...')
+
+    // Prevent HelpModal from appearing (it opens with a 500ms delay on first visit)
+    await page.addInitScript(() => {
+      localStorage.setItem('hasSeenHelpModal', 'true')
+    })
     await page.goto('http://localhost:3000')
 
     // Verify page loaded
     await expect(page).toHaveTitle(/蕉幻|Banana/i)
     console.log('✓ Homepage loaded successfully\n')
-
-    // Dismiss HelpModal if it appears (shown on first visit when localStorage is empty)
-    const helpModal = page.locator('.fixed.inset-0.z-50')
-    if (await helpModal.isVisible({ timeout: 2000 }).catch(() => false)) {
-      console.log('📋 Dismissing HelpModal...')
-      await page.keyboard.press('Escape')
-      await helpModal.waitFor({ state: 'hidden', timeout: 3000 })
-      console.log('✓ HelpModal dismissed\n')
-    }
     
     // ====================================
     // Step 2: Ensure "一句话生成" tab is selected (it's selected by default)
@@ -676,17 +672,12 @@ test.describe('UI E2E - Simplified (skip long waits)', () => {
   test('User flow verification: Only verify UI interactions, do not wait for AI generation', async ({ page }) => {
     console.log('\n🏃 Quick E2E test (verify UI flow, do not wait for generation)\n')
     
-    // Visit homepage
+    // Visit homepage (prevent HelpModal from appearing)
+    await page.addInitScript(() => {
+      localStorage.setItem('hasSeenHelpModal', 'true')
+    })
     await page.goto('http://localhost:3000')
     console.log('✓ Homepage loaded')
-
-    // Dismiss HelpModal if it appears (shown on first visit when localStorage is empty)
-    const helpModal = page.locator('.fixed.inset-0.z-50')
-    if (await helpModal.isVisible({ timeout: 2000 }).catch(() => false)) {
-      console.log('📋 Dismissing HelpModal...')
-      await page.keyboard.press('Escape')
-      await helpModal.waitFor({ state: 'hidden', timeout: 3000 })
-    }
 
     // Ensure "一句话生成" tab is selected (it's selected by default)
     await page.click('button:has-text("一句话生成")').catch(() => {
